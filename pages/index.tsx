@@ -27,6 +27,7 @@ const fetchTravelList = async (isAuth: boolean) => {
 }
 
 export default function Home() {
+	console.log('the env vars', process.env)
 	const [travelPosts, setTravelPosts] = useState<TravelPost[] | []>([])
 	const [currUser, setCurrUser] = useState<{} | null>(null)
 	const theme = useTheme()
