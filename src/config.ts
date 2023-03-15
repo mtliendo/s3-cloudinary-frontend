@@ -1,23 +1,18 @@
 export const config = {
-	aws_project_region: process.env.region || 'us-east-1',
+	aws_project_region: process.env.region,
 	Auth: {
-		region: process.env.region || 'us-east-1',
-		userPoolId: process.env.userpoolId || 'us-east-1_QY92WFIZD',
-		userPoolWebClientId:
-			process.env.userPoolWebClientId || '5u33vimotgl85cijvc6u7lf2hh',
-		identityPoolId:
-			process.env.identityPoolId ||
-			'us-east-1:d2c8bdce-648e-41c5-9a0b-dbba81e1c997',
+		region: process.env.region,
+		userPoolId: process.env.userpoolId,
+		userPoolWebClientId: process.env.userPoolWebClientId,
+		identityPoolId: process.env.identityPoolId,
 	},
 	Storage: {
 		AWSS3: {
-			bucket: process.env.bucket || 'travel-viewer-app-develop-bucket',
-			region: process.env.region || 'us-east-1',
+			bucket: process.env.bucket,
+			region: process.env.region,
 		},
 	},
-	aws_appsync_graphqlEndpoint:
-		process.env.appSyncURL ||
-		'https://i56hfsin4bgmzluqvvcohiohwa.appsync-api.us-east-1.amazonaws.com/graphql',
-	aws_appsync_region: process.env.region || 'us-east-1',
+	aws_appsync_graphqlEndpoint: process.env.appSyncURL,
+	aws_appsync_region: process.env.region,
 	aws_appsync_authenticationType: 'AMAZON_COGNITO_USER_POOLS',
 }
