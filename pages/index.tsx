@@ -5,14 +5,7 @@ import { API, Auth } from 'aws-amplify'
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import { CldImage } from 'next-cloudinary'
-import {
-	Card,
-	Flex,
-	Heading,
-	Text,
-	useTheme,
-	View,
-} from '@aws-amplify/ui-react'
+import { Card, Flex, Heading, Text, useTheme } from '@aws-amplify/ui-react'
 import { Edu_SA_Beginner } from 'next/font/google'
 const inter = Edu_SA_Beginner({ subsets: ['latin'] })
 const fetchTravelList = async (isAuth: boolean) => {
@@ -82,36 +75,36 @@ export default function Home() {
 					A journey to see the world through the lens of a Developer Advocate🥑
 				</Text>
 			</Flex>
-			<View
+			<Flex
 				as="main"
-				maxWidth={{ base: '400px', large: '500px' }}
-				margin="0 auto"
+				justifyContent={'center'}
+				marginTop={theme.tokens.space.large}
+				wrap="wrap"
 			>
-				<Flex
-					justifyContent={'space-between'}
-					marginTop={theme.tokens.space.large}
-				>
-					{travelPosts.map((post: TravelPost) => {
-						return (
-							<Card key={post.id} variation="elevated" maxWidth={'300px'}>
-								<Flex justifyContent={'center'}>
-									<CldImage
-										width="250"
-										height="250"
-										crop="thumb"
-										src={`${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_FOLDER}/public/${post.imgKey}`}
-										alt={post.description!}
-									/>
-								</Flex>
-								<Heading marginBlock={theme.tokens.space.medium} level={4}>
-									{post.title}
-								</Heading>
-								<Text>{post.description}</Text>
-							</Card>
-						)
-					})}
-				</Flex>
-			</View>
+				{travelPosts.map((post: TravelPost) => {
+					return (
+						<Card key={post.id} variation="elevated" maxWidth={'300px'}>
+							<Flex justifyContent={'center'}>
+								<CldImage
+									width="250"
+									height="250"
+									crop="thumb"
+									src={`${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_FOLDER}/public/${post.imgKey}`}
+									alt={post.description!}
+								/>
+							</Flex>
+							<Text
+								marginBlock={theme.tokens.space.medium}
+								fontWeight={theme.tokens.fontWeights.bold}
+								fontSize={theme.tokens.fontSizes.large}
+							>
+								{post.title}
+							</Text>
+							<Text>{post.description}</Text>
+						</Card>
+					)
+				})}
+			</Flex>
 		</>
 	)
 }
