@@ -20,7 +20,7 @@ import {
 import { createTravelPost } from '@/src/graphql/mutations'
 import Link from 'next/link'
 
-function CreateTravelPost({ user: {} }) {
+function CreateTravelPost() {
 	const [currImgKey, setCurrImgKey] = useState<string | undefined>()
 	const theme = useTheme()
 
