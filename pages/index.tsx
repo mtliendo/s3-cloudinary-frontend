@@ -99,7 +99,7 @@ export default function Home() {
 										width="250"
 										height="250"
 										crop="thumb"
-										src={`${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_FOLDER}${post.imgKey}`}
+										src={`${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_FOLDER}/public/${post.imgKey}`}
 										alt={post.description!}
 									/>
 								</Flex>
