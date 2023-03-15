@@ -116,5 +116,5 @@ function CreateTravelPost() {
 
 export default withAuthenticator(CreateTravelPost, {
 	signUpAttributes: ['email'],
-	// hideSignUp: true,
+	// hideSignUp: true
 })
