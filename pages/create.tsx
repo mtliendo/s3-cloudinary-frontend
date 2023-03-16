@@ -6,23 +6,11 @@ import { GraphQLResult } from '@aws-amplify/api-graphql'
 import { API } from 'aws-amplify'
 import Head from 'next/head'
 import { useState } from 'react'
-import {
-	Button,
-	FileUploader,
-	Flex,
-	Heading,
-	TextAreaField,
-	TextField,
-	useTheme,
-	View,
-	withAuthenticator,
-} from '@aws-amplify/ui-react'
+import { FileUploader, withAuthenticator } from '@aws-amplify/ui-react'
 import { createTravelPost } from '@/src/graphql/mutations'
-import Link from 'next/link'
 
 function CreateTravelPost() {
 	const [currImgKey, setCurrImgKey] = useState<string | undefined>()
-	const theme = useTheme()
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -51,42 +39,57 @@ function CreateTravelPost() {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 
-			<h2 className="text-cyan-300 text-2xl text-center">Create Travel Post</h2>
+			<div className="max-w-2xl  m-auto w-full mt-10 p-4">
+				<h2 className="text-cyan-300 text-4xl text-center mb-4">
+					Create Travel Post
+				</h2>
 
-			<div className="md:container md:mx-auto">
-				<form onSubmit={handleSubmit} className="form-control w-full max-w-xs">
-					<FileUploader
-						accessLevel="public"
-						acceptedFileTypes={['image/*']}
-						maxFileCount={1}
-						shouldAutoProceed
-						onSuccess={({ key }) => setCurrImgKey(key)}
-					/>
-					<label className="label">
-						<span className="label-text">What is the title?</span>
-					</label>
-					<input
-						type="text"
-						required
-						name="title"
-						placeholder="Type here"
-						className="input input-secondary input-bordered w-full max-w-xs"
-					/>
-
-					<label className="label">
-						<span className="label-text">
-							Description (200 character limit)
-						</span>
-					</label>
-					<textarea
-						className="textarea textarea-secondary"
-						placeholder="Bio"
-						name="description"
-						maxLength={200}
-						required
-					></textarea>
-					<div className="flex justify-end">
-						<button type="submit" className="btn btn-secondary">
+				<form
+					onSubmit={handleSubmit}
+					className="form-control grid grid-cols-2 gap-4 max-w-xl m-auto"
+				>
+					<div className="col-span-2">
+						<FileUploader
+							accessLevel="public"
+							acceptedFileTypes={['image/*']}
+							maxFileCount={1}
+							shouldAutoProceed
+							onSuccess={({ key }) => setCurrImgKey(key)}
+						/>
+					</div>
+					<div className="col-span-2">
+						<label className="label">
+							<span className="label-text">What is the title?</span>
+						</label>
+						<input
+							type="text"
+							required
+							name="title"
+							placeholder="My amazing event"
+							className="input input-secondary input-bordered border-2 p-3 md:text-xl w-full"
+						/>
+					</div>
+					<div className="col-span-2">
+						<label className="label">
+							<span className="label-text">
+								Description (200 character limit)
+							</span>
+						</label>
+						<textarea
+							className="textarea textarea-secondary border-2 p-3 md:text-xl w-full"
+							cols={30}
+							rows={8}
+							placeholder="This was amazing because..."
+							name="description"
+							maxLength={200}
+							required
+						></textarea>
+					</div>
+					<div className="col-span-2 text-right">
+						<button
+							type="submit"
+							className="btn btn-secondary py-3 px-6 w-full sm:w-32"
+						>
 							Button
 						</button>
 					</div>

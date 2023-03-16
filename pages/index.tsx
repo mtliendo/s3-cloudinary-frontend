@@ -3,7 +3,6 @@ import Head from 'next/head'
 import { useEffect, useReducer } from 'react'
 import { CldImage } from 'next-cloudinary'
 import { Raleway } from 'next/font/google'
-import Link from 'next/link'
 import { checkCurrentUser } from '../helpers/checkCurrentUser'
 import { fetchTravelPostsAuthOrUnAuth } from '../helpers/fetchTravelPostsAuthOrUnAuth'
 import { User } from '../helpers/types'
@@ -87,9 +86,9 @@ export default function Home() {
 							<figure>
 								<CldImage
 									className="mask mask-parallelogram"
+									crop="fill"
 									width="384"
 									height="250"
-									crop="fill"
 									src={`${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_FOLDER}/public/${post.imgKey}`}
 									alt={post.description!}
 								/>
