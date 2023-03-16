@@ -1,45 +1,52 @@
-import { listTravelPosts } from '@/src/graphql/queries'
-import { ListTravelPostsQuery, TravelPost } from '@/src/API'
-import { GraphQLResult } from '@aws-amplify/api-graphql'
-import { API, Auth } from 'aws-amplify'
+import { TravelPost } from '@/src/API'
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer } from 'react'
 import { CldImage } from 'next-cloudinary'
-import { Card, Flex, Heading, Text, useTheme } from '@aws-amplify/ui-react'
-import { Edu_SA_Beginner } from 'next/font/google'
-const inter = Edu_SA_Beginner({ subsets: ['latin'] })
-const fetchTravelList = async (isAuth: boolean) => {
-	const data = (await API.graphql({
-		query: listTravelPosts,
-		authMode: isAuth ? undefined : 'AWS_IAM',
-	})) as GraphQLResult<ListTravelPostsQuery>
+import { Raleway } from 'next/font/google'
+import Link from 'next/link'
+import { checkCurrentUser } from '../helpers/checkCurrentUser'
+import { fetchTravelPostsAuthOrUnAuth } from '../helpers/fetchTravelPostsAuthOrUnAuth'
+import { User } from '../helpers/types'
 
-	const travelPostsData = data.data?.listTravelPosts as TravelPost[]
+const eduSaBeginner = Raleway({ subsets: ['latin'] })
 
-	return travelPostsData
+interface State {
+	user: User | null
+	travelPosts: TravelPost[]
+}
+
+// Using a union type
+type ActionType = 'getUserAndtravelPostsData'
+
+interface Action {
+	type: ActionType
+	payload?: any // Replace 'any' with the specific payload type if required
+}
+
+function reducer(state: State, action: Action): State {
+	switch (action.type) {
+		case 'getUserAndtravelPostsData':
+			return {
+				travelPosts: action.payload.travelPostsData,
+				user: action.payload.user,
+			}
+
+		default:
+			return { travelPosts: [], user: null }
+	}
 }
 
 export default function Home() {
-	const [travelPosts, setTravelPosts] = useState<TravelPost[] | []>([])
-	const [currUser, setCurrUser] = useState<{} | null>(null)
-	const theme = useTheme()
-
-	const fetchCurrentUser = async () => {
-		let user
-		try {
-			user = await Auth.currentAuthenticatedUser()
-		} catch (e) {
-			user = null
-		}
-		setCurrUser(user)
-		return user
-	}
+	const [state, dispatch] = useReducer(reducer, { user: null, travelPosts: [] })
 
 	useEffect(() => {
-		fetchCurrentUser()
-			.then(fetchTravelList)
-			.then((fetchedTravelPosts) => {
-				setTravelPosts(fetchedTravelPosts)
+		checkCurrentUser()
+			.then(fetchTravelPostsAuthOrUnAuth)
+			.then(({ travelPostsData, user }) => {
+				dispatch({
+					type: 'getUserAndtravelPostsData',
+					payload: { travelPostsData, user },
+				})
 			})
 	}, [])
 
@@ -51,60 +58,53 @@ export default function Home() {
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<Flex
-				direction={'column'}
-				backgroundColor="white"
-				width="100vw"
-				height="20rem"
-				justifyContent={'center'}
-				alignItems="center"
+			<div className="navbar bg-primary text-primary-content">
+				<Link href={'/'} className="btn btn-ghost normal-case text-xl">
+					Home
+				</Link>
+			</div>
+			<div
+				className="hero min-h-screen mb-12"
+				style={{
+					backgroundImage: `url("https://res.cloudinary.com/focusotter-tuts/image/upload/e_blur:214/v1678928041/lgbmuyncmwhbstp12cdn.jpg")`,
+				}}
 			>
-				<Heading
-					maxWidth={{ base: '90%' }}
-					className={inter.className}
-					level={1}
-					textAlign="center"
-				>
-					The Travelling Dev ✈️
-				</Heading>
-				<Text
-					textAlign={'center'}
-					fontSize={theme.tokens.fontSizes.large}
-					maxWidth={{ base: '90%' }}
-				>
-					A journey to see the world through the lens of a Developer Advocate🥑
-				</Text>
-			</Flex>
-			<Flex
-				as="main"
-				justifyContent={'center'}
-				marginTop={theme.tokens.space.large}
-				wrap="wrap"
-			>
-				{travelPosts.map((post: TravelPost) => {
+				<div className="hero-overlay bg-opacity-60"></div>
+				<div className="hero-content text-center text-neutral-content">
+					<div className="max-w-md">
+						<h1
+							className={`text-5xl mb-5 font-bold text-cyan-300 ${eduSaBeginner.className}`}
+						>
+							The Travelling Dev
+						</h1>
+						<p className="mb-5 rounded-md p-1 text-2xl text-blue-200">
+							A journey to see the world through the lens of a Developer
+							Advocate🥑
+						</p>
+					</div>
+				</div>
+			</div>
+			<main className="flex flex-wrap justify-around">
+				{state.travelPosts?.map((post: TravelPost) => {
 					return (
-						<Card key={post.id} variation="elevated" maxWidth={'300px'}>
-							<Flex justifyContent={'center'}>
+						<div key={post.id} className="card w-96 bg-base-300 shadow-xl mb-8">
+							<figure>
 								<CldImage
-									width="250"
+									width="384"
 									height="250"
-									crop="thumb"
+									crop="fill"
 									src={`${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_FOLDER}/public/${post.imgKey}`}
 									alt={post.description!}
 								/>
-							</Flex>
-							<Text
-								marginBlock={theme.tokens.space.medium}
-								fontWeight={theme.tokens.fontWeights.bold}
-								fontSize={theme.tokens.fontSizes.large}
-							>
-								{post.title}
-							</Text>
-							<Text>{post.description}</Text>
-						</Card>
+							</figure>
+							<div className="card-body">
+								<h2 className="card-title">{post.title}</h2>
+								<p>{post.description}</p>
+							</div>
+						</div>
 					)
 				})}
-			</Flex>
+			</main>
 		</>
 	)
 }
