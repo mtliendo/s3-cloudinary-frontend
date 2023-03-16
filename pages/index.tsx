@@ -58,15 +58,11 @@ export default function Home() {
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<div className="navbar bg-primary text-primary-content">
-				<Link href={'/'} className="btn btn-ghost normal-case text-xl">
-					Home
-				</Link>
-			</div>
+
 			<div
 				className="hero min-h-screen mb-12"
 				style={{
-					backgroundImage: `url("https://res.cloudinary.com/focusotter-tuts/image/upload/e_blur:214/v1678928041/lgbmuyncmwhbstp12cdn.jpg")`,
+					backgroundImage: `url("https://res.cloudinary.com/focusotter-tuts/image/upload/e_blur:214,f_auto,q_auto/v1678928041/lgbmuyncmwhbstp12cdn.jpg")`,
 				}}
 			>
 				<div className="hero-overlay bg-opacity-60"></div>
@@ -90,6 +86,7 @@ export default function Home() {
 						<div key={post.id} className="card w-96 bg-base-300 shadow-xl mb-8">
 							<figure>
 								<CldImage
+									className="mask mask-parallelogram"
 									width="384"
 									height="250"
 									crop="fill"
