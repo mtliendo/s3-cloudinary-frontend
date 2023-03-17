@@ -23,6 +23,7 @@ export const NavBar = ({ isAuthPage, user }: NavBarProps) => {
 						{user ? (
 							<div className="avatar">
 								<div className="w-10 rounded-full">
+									{/* eslint-disable-next-line @next/next/no-img-element */}
 									<img
 										src="https://github.com/mtliendo.png?size=100"
 										alt="github profile pic"
@@ -57,7 +58,7 @@ export const NavBar = ({ isAuthPage, user }: NavBarProps) => {
 								</li>
 							</>
 						)}
-						<li>{!isAuthPage && <Link href={'/create'}>Create</Link>}</li>
+						<li>{!isAuthPage && <Link href={'/create'}>Create Post</Link>}</li>
 					</ul>
 				</div>
 			</div>

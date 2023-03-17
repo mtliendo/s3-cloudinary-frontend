@@ -9,7 +9,7 @@ import { ZenObservable } from 'zen-observable-ts'
 import { NavBar } from '@/components/NavBar'
 import { Hero } from '@/components/Hero'
 
-interface State {
+type State = {
 	user: User | null
 	travelPosts: TravelPost[]
 }
@@ -17,7 +17,7 @@ interface State {
 // Using a union type
 type ActionType = 'getUserAndtravelPostsData'
 
-interface Action {
+type Action = {
 	type: ActionType
 	payload?: any // Replace 'any' with the specific payload type if required
 }
