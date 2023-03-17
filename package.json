@@ -1,31 +1,32 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@aws-amplify/ui-react": "^4.3.10",
-    "@types/node": "18.14.6",
-    "@types/react": "18.0.28",
-    "@types/react-dom": "18.0.11",
-    "aws-amplify": "^5.0.18",
-    "daisyui": "^2.51.4",
-    "eslint": "8.35.0",
-    "eslint-config-next": "13.2.3",
-    "next": "13.2.3",
-    "next-cloudinary": "^4.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "typescript": "4.9.5"
-  },
-  "devDependencies": {
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.21",
-    "tailwindcss": "^3.2.7"
-  }
+	"name": "frontend",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"prebuild": "npx @aws-amplify/cli codegen",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint"
+	},
+	"dependencies": {
+		"@aws-amplify/ui-react": "^4.3.10",
+		"@types/node": "18.14.6",
+		"@types/react": "18.0.28",
+		"@types/react-dom": "18.0.11",
+		"aws-amplify": "^5.0.18",
+		"daisyui": "^2.51.4",
+		"eslint": "8.35.0",
+		"eslint-config-next": "13.2.3",
+		"next": "13.2.3",
+		"next-cloudinary": "^4.0.0",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"typescript": "4.9.5"
+	},
+	"devDependencies": {
+		"autoprefixer": "^10.4.14",
+		"postcss": "^8.4.21",
+		"tailwindcss": "^3.2.7"
+	}
 }
