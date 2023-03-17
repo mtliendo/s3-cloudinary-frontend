@@ -1,11 +1,12 @@
 import { TravelPost } from '@/src/API'
 import Head from 'next/head'
 import { useEffect, useReducer } from 'react'
-import { CldImage } from 'next-cloudinary'
 import { Raleway } from 'next/font/google'
-import { checkCurrentUser } from '../helpers/checkCurrentUser'
 import { fetchTravelPostsAuthOrUnAuth } from '../helpers/fetchTravelPostsAuthOrUnAuth'
 import { User } from '../helpers/types'
+import { DisplayTravelPosts } from '@/components/DisplayTravelPosts'
+import { listenForPostsAuthOrUnAuth } from '@/helpers/listenForPostsAuthOrUnauth'
+import { ZenObservable } from 'zen-observable-ts'
 
 const eduSaBeginner = Raleway({ subsets: ['latin'] })
 
@@ -39,14 +40,27 @@ export default function Home() {
 	const [state, dispatch] = useReducer(reducer, { user: null, travelPosts: [] })
 
 	useEffect(() => {
-		checkCurrentUser()
-			.then(fetchTravelPostsAuthOrUnAuth)
-			.then(({ travelPostsData, user }) => {
-				dispatch({
-					type: 'getUserAndtravelPostsData',
-					payload: { travelPostsData, user },
-				})
+		let sub: ZenObservable.Subscription | undefined
+		listenForPostsAuthOrUnAuth().then((currentSub) => {
+			sub = currentSub
+		})
+
+		// Stop receiving data updates from the subscription
+		return () => {
+			// if-check since in dev useEffect gets called twice. Doing this check prevents "unsubscribe" from being called before the websocket has been opened.
+			if (sub) {
+				sub.unsubscribe()
+			}
+		}
+	}, [])
+
+	useEffect(() => {
+		fetchTravelPostsAuthOrUnAuth().then(({ travelPostsData, user }) => {
+			dispatch({
+				type: 'getUserAndtravelPostsData',
+				payload: { travelPostsData, user },
 			})
+		})
 	}, [])
 
 	return (
@@ -79,28 +93,7 @@ export default function Home() {
 					</div>
 				</div>
 			</div>
-			<main className="flex flex-wrap justify-around">
-				{state.travelPosts?.map((post: TravelPost) => {
-					return (
-						<div key={post.id} className="card w-96 bg-base-300 shadow-xl mb-8">
-							<figure>
-								<CldImage
-									className="mask mask-parallelogram"
-									crop="fill"
-									width="384"
-									height="250"
-									src={`${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_FOLDER}/public/${post.imgKey}`}
-									alt={post.description!}
-								/>
-							</figure>
-							<div className="card-body">
-								<h2 className="card-title">{post.title}</h2>
-								<p>{post.description}</p>
-							</div>
-						</div>
-					)
-				})}
-			</main>
+			<DisplayTravelPosts travelPosts={state.travelPosts} />
 		</>
 	)
 }
