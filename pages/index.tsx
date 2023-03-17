@@ -1,46 +1,65 @@
-import { listTravelPosts } from '@/src/graphql/queries'
-import { ListTravelPostsQuery, TravelPost } from '@/src/API'
-import { GraphQLResult } from '@aws-amplify/api-graphql'
-import { API, Auth } from 'aws-amplify'
+import { TravelPost } from '@/src/API'
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
-import { CldImage } from 'next-cloudinary'
-import { Card, Flex, Heading, Text, useTheme } from '@aws-amplify/ui-react'
-import { Edu_SA_Beginner } from 'next/font/google'
-const inter = Edu_SA_Beginner({ subsets: ['latin'] })
-const fetchTravelList = async (isAuth: boolean) => {
-	const data = (await API.graphql({
-		query: listTravelPosts,
-		authMode: isAuth ? undefined : 'AWS_IAM',
-	})) as GraphQLResult<ListTravelPostsQuery>
+import { useEffect, useReducer } from 'react'
+import { fetchTravelPostsAuthOrUnAuth } from '../helpers/fetchTravelPostsAuthOrUnAuth'
+import { User } from '../helpers/types'
+import { DisplayTravelPosts } from '@/components/DisplayTravelPosts'
+import { listenForPostsAuthOrUnAuth } from '@/helpers/listenForPostsAuthOrUnauth'
+import { ZenObservable } from 'zen-observable-ts'
+import { NavBar } from '@/components/NavBar'
+import { Hero } from '@/components/Hero'
 
-	const travelPostsData = data.data?.listTravelPosts as TravelPost[]
+interface State {
+	user: User | null
+	travelPosts: TravelPost[]
+}
 
-	return travelPostsData
+// Using a union type
+type ActionType = 'getUserAndtravelPostsData'
+
+interface Action {
+	type: ActionType
+	payload?: any // Replace 'any' with the specific payload type if required
+}
+
+function reducer(state: State, action: Action): State {
+	switch (action.type) {
+		case 'getUserAndtravelPostsData':
+			return {
+				travelPosts: action.payload.travelPostsData,
+				user: action.payload.user,
+			}
+
+		default:
+			return { travelPosts: [], user: null }
+	}
 }
 
 export default function Home() {
-	const [travelPosts, setTravelPosts] = useState<TravelPost[] | []>([])
-	const [currUser, setCurrUser] = useState<{} | null>(null)
-	const theme = useTheme()
-
-	const fetchCurrentUser = async () => {
-		let user
-		try {
-			user = await Auth.currentAuthenticatedUser()
-		} catch (e) {
-			user = null
-		}
-		setCurrUser(user)
-		return user
-	}
+	const [state, dispatch] = useReducer(reducer, { user: null, travelPosts: [] })
 
 	useEffect(() => {
-		fetchCurrentUser()
-			.then(fetchTravelList)
-			.then((fetchedTravelPosts) => {
-				setTravelPosts(fetchedTravelPosts)
+		let sub: ZenObservable.Subscription | undefined
+		listenForPostsAuthOrUnAuth().then((currentSub) => {
+			sub = currentSub
+		})
+
+		// Stop receiving data updates from the subscription
+		return () => {
+			// if-check since in dev useEffect gets called twice. Doing this check prevents "unsubscribe" from being called before the websocket has been opened.
+			if (sub) {
+				sub.unsubscribe()
+			}
+		}
+	}, [])
+
+	useEffect(() => {
+		fetchTravelPostsAuthOrUnAuth().then(({ travelPostsData, user }) => {
+			dispatch({
+				type: 'getUserAndtravelPostsData',
+				payload: { travelPostsData, user },
 			})
+		})
 	}, [])
 
 	return (
@@ -51,60 +70,9 @@ export default function Home() {
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<Flex
-				direction={'column'}
-				backgroundColor="white"
-				width="100vw"
-				height="20rem"
-				justifyContent={'center'}
-				alignItems="center"
-			>
-				<Heading
-					maxWidth={{ base: '90%' }}
-					className={inter.className}
-					level={1}
-					textAlign="center"
-				>
-					The Travelling Dev ✈️
-				</Heading>
-				<Text
-					textAlign={'center'}
-					fontSize={theme.tokens.fontSizes.large}
-					maxWidth={{ base: '90%' }}
-				>
-					A journey to see the world through the lens of a Developer Advocate🥑
-				</Text>
-			</Flex>
-			<Flex
-				as="main"
-				justifyContent={'center'}
-				marginTop={theme.tokens.space.large}
-				wrap="wrap"
-			>
-				{travelPosts.map((post: TravelPost) => {
-					return (
-						<Card key={post.id} variation="elevated" maxWidth={'300px'}>
-							<Flex justifyContent={'center'}>
-								<CldImage
-									width="250"
-									height="250"
-									crop="thumb"
-									src={`${process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_FOLDER}/public/${post.imgKey}`}
-									alt={post.description!}
-								/>
-							</Flex>
-							<Text
-								marginBlock={theme.tokens.space.medium}
-								fontWeight={theme.tokens.fontWeights.bold}
-								fontSize={theme.tokens.fontSizes.large}
-							>
-								{post.title}
-							</Text>
-							<Text>{post.description}</Text>
-						</Card>
-					)
-				})}
-			</Flex>
+			<NavBar user={state.user} />
+			<Hero />
+			<DisplayTravelPosts travelPosts={state.travelPosts} />
 		</>
 	)
 }

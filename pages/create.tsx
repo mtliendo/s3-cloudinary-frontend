@@ -1,30 +1,44 @@
 import {
 	CreateTravelPostMutationVariables,
 	CreateTravelPostMutation,
+	ListTravelPostsQuery,
+	TravelPost,
 } from '@/src/API'
 import { GraphQLResult } from '@aws-amplify/api-graphql'
 import { API } from 'aws-amplify'
 import Head from 'next/head'
-import { useState } from 'react'
-import {
-	Button,
-	FileUploader,
-	Flex,
-	Heading,
-	TextAreaField,
-	TextField,
-	useTheme,
-	View,
-	withAuthenticator,
-} from '@aws-amplify/ui-react'
+import { useEffect, useState } from 'react'
+import { FileUploader, withAuthenticator } from '@aws-amplify/ui-react'
 import { createTravelPost } from '@/src/graphql/mutations'
-import Link from 'next/link'
+import { listTravelPosts } from '@/src/graphql/queries'
+import { DisplayTravelPosts } from '@/components/DisplayTravelPosts'
+import { NavBar } from '@/components/NavBar'
+import { User } from '@/helpers/types'
+import { TravelPostForm } from '@/components/TravelPostForm'
 
-function CreateTravelPost() {
+type CreateTravelPostProps = {
+	user: User
+}
+function CreateTravelPost({ user }: CreateTravelPostProps) {
 	const [currImgKey, setCurrImgKey] = useState<string | undefined>()
-	const theme = useTheme()
+	const [travelPosts, setTravelPosts] = useState<TravelPost[] | []>([])
+	const [currTravelPost, setCurrTravelPost] = useState<TravelPost | undefined>()
+	console.log('the current post', currTravelPost)
+	useEffect(() => {
+		const fetchTravelPosts = async () => {
+			const data = (await API.graphql({
+				query: listTravelPosts,
+			})) as GraphQLResult<ListTravelPostsQuery>
 
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+			return data.data?.listTravelPosts as TravelPost[]
+		}
+
+		fetchTravelPosts().then((travelPostsData) =>
+			setTravelPosts(travelPostsData)
+		)
+	}, [])
+
+	const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		const formData = new FormData(e.currentTarget)
 		const title = formData.get('title')?.valueOf()
@@ -40,6 +54,17 @@ function CreateTravelPost() {
 				},
 			} as CreateTravelPostMutationVariables,
 		})) as GraphQLResult<CreateTravelPostMutation>
+
+		const form = e.currentTarget
+		form.reset()
+	}
+
+	const handlePostSelect = (post: TravelPost) => {
+		setCurrTravelPost(post)
+	}
+
+	const handleFileUploadSuccess = (key: string) => {
+		setCurrImgKey(key)
 	}
 
 	return (
@@ -50,66 +75,21 @@ function CreateTravelPost() {
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<View margin={{ base: theme.tokens.space.medium }}>
-				<nav>
-					<Link href={'/'}>Home</Link>
-				</nav>
-				<main>
-					<View
-						as="section"
-						marginBottom={{
-							base: theme.tokens.space.medium,
-							large: theme.tokens.space.xxxl,
-						}}
-					>
-						<Heading textAlign={'center'} level={3}>
-							Create Travel Post
-						</Heading>
-					</View>
-					<View
-						as="section"
-						maxWidth={{ base: '400px', large: '500px' }}
-						margin="0 auto"
-					>
-						<FileUploader
-							accessLevel="public"
-							acceptedFileTypes={['image/*']}
-							maxFileCount={1}
-							shouldAutoProceed
-							onSuccess={({ key }) => setCurrImgKey(key)}
-						/>
-						<form onSubmit={handleSubmit}>
-							<TextField
-								required
-								label="Title"
-								name="title"
-								marginBlock={{
-									base: theme.tokens.space.medium,
-									large: theme.tokens.space.large,
-								}}
-							/>
-							<TextAreaField
-								marginBlock={{
-									base: theme.tokens.space.medium,
-									large: theme.tokens.space.large,
-								}}
-								maxLength={200}
-								required
-								label="Description (200 character limit)"
-								name="description"
-							/>
-							<Flex
-								marginTop={theme.tokens.space.medium}
-								justifyContent={'flex-end'}
-							>
-								<Button type="submit" variation="primary">
-									Submit
-								</Button>
-							</Flex>
-						</form>
-					</View>
-				</main>
-			</View>
+			<NavBar isAuthPage user={user} />
+			<div className="max-w-2xl  m-auto w-full mt-10 mb-8 p-4">
+				<h2 className="text-cyan-300 text-4xl text-center mb-4">
+					Create Travel Post
+				</h2>
+
+				<TravelPostForm
+					handleFormSubmit={handleFormSubmit}
+					handleFileUploadSuccess={handleFileUploadSuccess}
+				/>
+			</div>
+			<DisplayTravelPosts
+				travelPosts={travelPosts}
+				handlePostSelect={handlePostSelect}
+			/>
 		</>
 	)
 }
